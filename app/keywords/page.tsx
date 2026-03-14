@@ -73,13 +73,16 @@ export default function KeywordsPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (modalMode === 'add') {
-      addKeyword({
-        keyword: newKeyword,
-        url: '',
+      const keywordsToAdd = newKeyword.split('\n').map(k => k.trim()).filter(k => k.length > 0);
+      keywordsToAdd.forEach(kw => {
+        addKeyword({
+          keyword: kw,
+          url: '',
+        });
       });
     } else if (modalMode === 'edit' && selectedKeyword) {
       updateKeyword(selectedKeyword.id, {
-        keyword: newKeyword,
+        keyword: newKeyword.trim(),
       });
     }
     setIsModalOpen(false);
@@ -143,15 +146,27 @@ export default function KeywordsPage() {
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Từ khoá</label>
-                <input 
-                  required
-                  type="text" 
-                  value={newKeyword}
-                  onChange={e => setNewKeyword(e.target.value)}
-                  className="w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                  placeholder="Nhập từ khoá..."
-                />
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  {modalMode === 'add' ? 'Từ khoá (mỗi từ khoá 1 dòng)' : 'Từ khoá'}
+                </label>
+                {modalMode === 'add' ? (
+                  <textarea 
+                    required
+                    value={newKeyword}
+                    onChange={e => setNewKeyword(e.target.value)}
+                    className="w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border min-h-[120px]"
+                    placeholder="Nhập danh sách từ khoá...&#10;từ khoá 1&#10;từ khoá 2"
+                  />
+                ) : (
+                  <input 
+                    required
+                    type="text" 
+                    value={newKeyword}
+                    onChange={e => setNewKeyword(e.target.value)}
+                    className="w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                    placeholder="Nhập từ khoá..."
+                  />
+                )}
               </div>
               <div className="mt-6 flex justify-end gap-3">
                 <button 
