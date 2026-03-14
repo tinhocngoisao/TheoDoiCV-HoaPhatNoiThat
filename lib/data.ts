@@ -8,6 +8,8 @@ export interface Task {
   status: TaskStatus;
   date: string;
   dueDate: string;
+  month?: string;
+  description?: string;
 }
 
 export interface KeywordRanking {
@@ -29,12 +31,12 @@ export interface MonthlyPlan {
 }
 
 export const mockTasks: Task[] = [
-  { id: '1', title: 'Audit technical SEO trang chủ', type: 'audit', status: 'done', date: '2026-03-10', dueDate: '2026-03-11' },
-  { id: '2', title: 'Viết bài "Hướng dẫn SEO 2026"', type: 'content', status: 'in-progress', date: '2026-03-11', dueDate: '2026-03-13' },
-  { id: '3', title: 'Đi link forum công nghệ', type: 'backlink', status: 'todo', date: '2026-03-12', dueDate: '2026-03-14' },
-  { id: '4', title: 'Đăng bài fanpage Facebook', type: 'social', status: 'done', date: '2026-03-12', dueDate: '2026-03-12' },
-  { id: '5', title: 'Tối ưu tốc độ tải trang', type: 'audit', status: 'todo', date: '2026-03-13', dueDate: '2026-03-15' },
-  { id: '6', title: 'Cập nhật nội dung bài cũ', type: 'content', status: 'todo', date: '2026-03-14', dueDate: '2026-03-16' },
+  { id: '1', title: 'Audit technical SEO trang chủ', type: 'audit', status: 'done', date: '2026-03-10', dueDate: '2026-03-11', month: 'Tháng 3/2026', description: 'Kiểm tra tốc độ, thẻ meta, sitemap.' },
+  { id: '2', title: 'Viết bài "Hướng dẫn SEO 2026"', type: 'content', status: 'in-progress', date: '2026-03-11', dueDate: '2026-03-13', month: 'Tháng 3/2026', description: 'Bài viết dài 2000 từ, chuẩn SEO.' },
+  { id: '3', title: 'Đi link forum công nghệ', type: 'backlink', status: 'todo', date: '2026-03-12', dueDate: '2026-03-14', month: 'Tháng 3/2026', description: 'Tìm 5 forum uy tín để đặt link.' },
+  { id: '4', title: 'Đăng bài fanpage Facebook', type: 'social', status: 'done', date: '2026-03-12', dueDate: '2026-03-12', month: 'Tháng 3/2026', description: 'Chia sẻ bài viết mới nhất lên fanpage.' },
+  { id: '5', title: 'Tối ưu tốc độ tải trang', type: 'audit', status: 'todo', date: '2026-03-13', dueDate: '2026-03-15', month: 'Tháng 3/2026', description: 'Nén ảnh, minify CSS/JS.' },
+  { id: '6', title: 'Cập nhật nội dung bài cũ', type: 'content', status: 'todo', date: '2026-03-14', dueDate: '2026-03-16', month: 'Tháng 3/2026', description: 'Cập nhật thông tin cho bài viết năm ngoái.' },
 ];
 
 export const last30Days = [
