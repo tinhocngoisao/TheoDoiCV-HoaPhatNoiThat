@@ -1,18 +1,42 @@
 'use client';
 
 import { useState } from 'react';
-import { mockTasks, TaskType, TaskStatus } from '@/lib/data';
-import { CheckCircle2, Clock, Filter, Plus, Search } from 'lucide-react';
+import { TaskType, TaskStatus } from '@/lib/data';
+import { useData } from '@/lib/DataContext';
+import { CheckCircle2, Clock, Filter, Plus, Search, X } from 'lucide-react';
 
 export default function TasksPage() {
+  const { tasks, addTask } = useData();
   const [filterType, setFilterType] = useState<TaskType | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<TaskStatus | 'all'>('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskType, setNewTaskType] = useState<TaskType>('audit');
+  const [newTaskStatus, setNewTaskStatus] = useState<TaskStatus>('todo');
+  const [newTaskDueDate, setNewTaskDueDate] = useState('');
 
-  const filteredTasks = mockTasks.filter(task => {
+  const filteredTasks = tasks.filter(task => {
     if (filterType !== 'all' && task.type !== filterType) return false;
     if (filterStatus !== 'all' && task.status !== filterStatus) return false;
     return true;
   });
+
+  const handleAddTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    addTask({
+      title: newTaskTitle,
+      type: newTaskType,
+      status: newTaskStatus,
+      date: new Date().toISOString().split('T')[0],
+      dueDate: newTaskDueDate || new Date().toISOString().split('T')[0],
+    });
+    setIsModalOpen(false);
+    setNewTaskTitle('');
+    setNewTaskType('audit');
+    setNewTaskStatus('todo');
+    setNewTaskDueDate('');
+  };
 
   return (
     <div className="space-y-6">
@@ -21,11 +45,91 @@ export default function TasksPage() {
           <h1 className="text-2xl font-bold text-slate-900">Quản lý công việc</h1>
           <p className="text-sm text-slate-500">Theo dõi và cập nhật trạng thái công việc SEO hàng ngày.</p>
         </div>
-        <button className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        >
           <Plus className="h-5 w-5" />
           Thêm công việc
         </button>
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-slate-900">Thêm công việc mới</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <form onSubmit={handleAddTask} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Tên công việc</label>
+                <input 
+                  required
+                  type="text" 
+                  value={newTaskTitle}
+                  onChange={e => setNewTaskTitle(e.target.value)}
+                  className="w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                  placeholder="Nhập tên công việc..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Loại công việc</label>
+                <select 
+                  value={newTaskType}
+                  onChange={e => setNewTaskType(e.target.value as TaskType)}
+                  className="w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                >
+                  <option value="audit">Audit Website</option>
+                  <option value="content">Nội dung</option>
+                  <option value="backlink">Backlink</option>
+                  <option value="social">Social Entity</option>
+                  <option value="other">Khác</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Trạng thái</label>
+                <select 
+                  value={newTaskStatus}
+                  onChange={e => setNewTaskStatus(e.target.value as TaskStatus)}
+                  className="w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                >
+                  <option value="todo">Chưa làm</option>
+                  <option value="in-progress">Đang làm</option>
+                  <option value="done">Hoàn thành</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Hạn chót</label>
+                <input 
+                  required
+                  type="date" 
+                  value={newTaskDueDate}
+                  onChange={e => setNewTaskDueDate(e.target.value)}
+                  className="w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                />
+              </div>
+              <div className="mt-6 flex justify-end gap-3">
+                <button 
+                  type="button" 
+                  onClick={() => setIsModalOpen(false)}
+                  className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50"
+                >
+                  Huỷ
+                </button>
+                <button 
+                  type="submit"
+                  className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                >
+                  Lưu công việc
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <div className="rounded-xl bg-white shadow-sm border border-slate-200">
         <div className="border-b border-slate-200 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

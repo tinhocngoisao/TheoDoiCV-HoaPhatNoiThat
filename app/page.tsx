@@ -2,10 +2,13 @@
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ArrowUpRight, ArrowDownRight, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
-import { mockKeywords, completionData, mockTasks, last30Days } from '@/lib/data';
+import { completionData, last30Days } from '@/lib/data';
+import { useData } from '@/lib/DataContext';
 import Link from 'next/link';
 
 export default function Dashboard() {
+  const { tasks, keywords } = useData();
+  
   const stats = [
     { name: 'Công việc hoàn thành', value: '85%', change: '+12%', changeType: 'positive', icon: CheckCircle2 },
     { name: 'Từ khoá tăng hạng', value: '24', change: '+4', changeType: 'positive', icon: ArrowUpRight },
@@ -77,7 +80,7 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {mockKeywords.slice(0, 5).map(kw => (
+                {keywords.slice(0, 5).map(kw => (
                   <tr key={kw.id}>
                     <td className="py-2 pr-4 text-sm font-medium text-slate-900 truncate max-w-[120px]">{kw.keyword}</td>
                     {last30Days.slice(-7).map(d => {
@@ -97,7 +100,7 @@ export default function Dashboard() {
           <h2 className="text-lg font-medium text-slate-900">Công việc hôm nay</h2>
         </div>
         <ul role="list" className="divide-y divide-slate-200">
-          {mockTasks.slice(0, 4).map((task) => (
+          {tasks.slice(0, 4).map((task) => (
             <li key={task.id} className="px-6 py-4 hover:bg-slate-50 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
