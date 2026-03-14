@@ -11,6 +11,9 @@ interface DataContextType {
   updateTask: (id: string, task: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   addKeyword: (keyword: Omit<KeywordRanking, 'id' | 'history' | 'currentRank' | 'previousRank'>) => void;
+  updateKeyword: (id: string, keyword: Partial<KeywordRanking>) => void;
+  deleteKeyword: (id: string) => void;
+  checkKeywordRank: (id: string) => Promise<void>;
   addPlan: (plan: Omit<MonthlyPlan, 'id' | 'progress'>) => void;
   updatePlan: (id: string, plan: Partial<MonthlyPlan>) => void;
   deletePlan: (id: string) => void;
@@ -50,6 +53,62 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setKeywords([newKeyword, ...keywords]);
   };
 
+  const updateKeyword = (id: string, kwData: Partial<KeywordRanking>) => {
+    setKeywords(keywords.map(k => k.id === id ? { ...k, ...kwData } : k));
+  };
+
+  const deleteKeyword = (id: string) => {
+    setKeywords(keywords.filter(k => k.id !== id));
+  };
+
+  const checkKeywordRank = async (id: string) => {
+    const keywordToCheck = keywords.find(k => k.id === id);
+    if (!keywordToCheck) return;
+
+    try {
+      const response = await fetch('/api/check-rank', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          keyword: keywordToCheck.keyword, 
+          domain: 'hoaphatnoithat.net.vn' 
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to check rank');
+      
+      const data = await response.json();
+      const newRank = data.rank; // 0 means not found in top 100
+      const foundUrl = data.url;
+
+      setKeywords(prev => prev.map(k => {
+        if (k.id === id) {
+          const today = new Date().toISOString().split('T')[0];
+          const newHistory = [...k.history];
+          const todayIndex = newHistory.findIndex(h => h.date === today);
+          
+          if (todayIndex >= 0) {
+            newHistory[todayIndex].rank = newRank;
+          } else {
+            newHistory.push({ date: today, rank: newRank });
+          }
+
+          return {
+            ...k,
+            previousRank: k.currentRank,
+            currentRank: newRank,
+            url: foundUrl || k.url, // Cập nhật URL chính xác tìm được
+            history: newHistory
+          };
+        }
+        return k;
+      }));
+    } catch (error) {
+      console.error('Check rank error:', error);
+      alert('Có lỗi xảy ra khi kiểm tra thứ hạng.');
+    }
+  };
+
   const addPlan = (planData: Omit<MonthlyPlan, 'id' | 'progress'>) => {
     const newPlan: MonthlyPlan = {
       ...planData,
@@ -84,6 +143,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updateTask, 
       deleteTask, 
       addKeyword, 
+      updateKeyword,
+      deleteKeyword,
+      checkKeywordRank,
       addPlan, 
       updatePlan, 
       deletePlan 
