@@ -66,17 +66,18 @@ export default function PlansPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Kế hoạch công việc</h1>
-          <p className="text-sm text-slate-500">Quản lý kế hoạch SEO tổng thể 12 tháng và chi tiết từng tháng.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Kế hoạch công việc</h1>
+          <p className="text-sm text-slate-500 mt-1">Quản lý kế hoạch SEO tổng thể 12 tháng và chi tiết từng tháng.</p>
         </div>
         <button 
           onClick={openAddModal}
-          className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          className="inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-md bg-indigo-600 px-3 py-2 sm:px-4 sm:py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 shrink-0 whitespace-nowrap"
         >
-          <Plus className="h-5 w-5" />
-          Thêm kế hoạch
+          <Plus className="h-4 w-4 sm:h-5 w-5" />
+          <span className="hidden sm:inline">Thêm kế hoạch</span>
+          <span className="sm:hidden">Thêm</span>
         </button>
       </div>
 
@@ -194,37 +195,35 @@ export default function PlansPage() {
       )}
 
       <div className="rounded-xl bg-white shadow-sm border border-slate-200 overflow-hidden">
-        <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between bg-slate-50">
-          <h2 className="text-lg font-medium text-slate-900 flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-indigo-600" />
-            Kế hoạch tổng thể năm 2026
+        <div className="border-b border-slate-200 px-4 py-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50">
+          <h2 className="text-base sm:text-lg font-medium text-slate-900 flex items-start sm:items-center gap-2">
+            <Calendar className="h-5 w-5 text-indigo-600 shrink-0 mt-0.5 sm:mt-0" />
+            <span>Kế hoạch tổng thể năm 2026</span>
           </h2>
-          <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+          <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 w-fit">
             Đang thực hiện
           </span>
         </div>
         <ul role="list" className="divide-y divide-slate-200">
           {plans.map((plan) => (
-            <li key={plan.id} onClick={() => openViewModal(plan)} className="p-6 hover:bg-slate-50 transition-colors group cursor-pointer">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-indigo-600">{plan.month}</p>
-                    <p className="text-sm text-slate-500">{plan.progress}% hoàn thành</p>
+            <li key={plan.id} onClick={() => openViewModal(plan)} className="p-4 sm:p-6 hover:bg-slate-50 transition-colors group cursor-pointer">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-indigo-600">{plan.month}</p>
+                  <p className="text-sm text-slate-500">{plan.progress}% hoàn thành</p>
+                </div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <h3 className="text-base sm:text-lg font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">{plan.title}</h3>
+                    <p className="mt-1 text-sm text-slate-500 line-clamp-2 sm:line-clamp-none leading-relaxed">{plan.description}</p>
                   </div>
-                  <div className="mt-2 flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">{plan.title}</h3>
-                      <p className="mt-1 text-sm text-slate-500">{plan.description}</p>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-indigo-600" />
-                  </div>
-                  <div className="mt-4 w-full bg-slate-200 rounded-full h-2.5">
-                    <div 
-                      className={`h-2.5 rounded-full ${plan.progress === 100 ? 'bg-emerald-500' : plan.progress > 0 ? 'bg-indigo-600' : 'bg-slate-300'}`} 
-                      style={{ width: `${plan.progress}%` }}
-                    ></div>
-                  </div>
+                  <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-indigo-600 shrink-0 mt-1" />
+                </div>
+                <div className="mt-2 w-full bg-slate-200 rounded-full h-2.5">
+                  <div 
+                    className={`h-2.5 rounded-full ${plan.progress === 100 ? 'bg-emerald-500' : plan.progress > 0 ? 'bg-indigo-600' : 'bg-slate-300'}`} 
+                    style={{ width: `${plan.progress}%` }}
+                  ></div>
                 </div>
               </div>
             </li>

@@ -96,17 +96,18 @@ export default function TasksPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Quản lý công việc</h1>
-          <p className="text-sm text-slate-500">Theo dõi và cập nhật trạng thái công việc SEO hàng ngày.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Quản lý công việc</h1>
+          <p className="text-sm text-slate-500 mt-1">Theo dõi và cập nhật trạng thái công việc SEO hàng ngày.</p>
         </div>
         <button 
           onClick={openAddModal}
-          className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          className="inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-md bg-indigo-600 px-3 py-2 sm:px-4 sm:py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 shrink-0 whitespace-nowrap"
         >
-          <Plus className="h-5 w-5" />
-          Thêm công việc
+          <Plus className="h-4 w-4 sm:h-5 w-5" />
+          <span className="hidden sm:inline">Thêm công việc</span>
+          <span className="sm:hidden">Thêm</span>
         </button>
       </div>
 
@@ -287,24 +288,24 @@ export default function TasksPage() {
       )}
 
       <div className="rounded-xl bg-white shadow-sm border border-slate-200">
-        <div className="border-b border-slate-200 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="relative w-full max-w-sm">
+        <div className="border-b border-slate-200 px-4 py-4 sm:px-6 flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-slate-50">
+          <div className="relative w-full xl:max-w-sm">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-              <Search className="h-5 w-5 text-slate-400" aria-hidden="true" />
+              <Search className="h-4 w-4 text-slate-400" aria-hidden="true" />
             </div>
             <input
               type="text"
-              className="block w-full rounded-md border-0 py-1.5 pl-10 pr-3 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 py-1.5 pl-9 pr-3 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-sm sm:leading-6"
               placeholder="Tìm kiếm công việc..."
             />
           </div>
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-slate-500" />
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-1.5 sm:gap-2 col-span-1">
+              <Calendar className="h-4 w-4 text-slate-500 hidden sm:block" />
               <select
                 value={filterMonth}
                 onChange={(e) => setFilterMonth(e.target.value)}
-                className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                className="block w-full rounded-md border-0 py-1.5 pl-2 sm:pl-3 pr-8 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-indigo-600 text-xs sm:text-sm sm:leading-6"
               >
                 <option value="all">Tất cả tháng</option>
                 {availableMonths.map(month => (
@@ -312,12 +313,12 @@ export default function TasksPage() {
                 ))}
               </select>
             </div>
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-slate-500" />
+            <div className="flex items-center gap-1.5 sm:gap-2 col-span-1">
+              <Filter className="h-4 w-4 text-slate-500 hidden sm:block" />
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value as TaskType | 'all')}
-                className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                className="block w-full rounded-md border-0 py-1.5 pl-2 sm:pl-3 pr-8 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-indigo-600 text-xs sm:text-sm sm:leading-6"
               >
                 <option value="all">Tất cả loại</option>
                 <option value="audit">Audit Website</option>
@@ -329,7 +330,7 @@ export default function TasksPage() {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value as TaskStatus | 'all')}
-              className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              className="block w-full col-span-2 sm:w-auto rounded-md border-0 py-1.5 pl-2 sm:pl-3 pr-8 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-indigo-600 text-xs sm:text-sm sm:leading-6"
             >
               <option value="all">Tất cả trạng thái</option>
               <option value="todo">Chưa làm</option>
@@ -340,15 +341,15 @@ export default function TasksPage() {
         </div>
         <ul role="list" className="divide-y divide-slate-200">
           {filteredTasks.map((task) => (
-            <li key={task.id} className="px-6 py-4 hover:bg-slate-50 transition-colors group">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+            <li key={task.id} className="p-4 sm:px-6 sm:py-4 hover:bg-slate-50 transition-colors group">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-start sm:items-center gap-3">
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
                       updateTask(task.id, { status: task.status === 'done' ? 'todo' : 'done' });
                     }}
-                    className="focus:outline-none"
+                    className="focus:outline-none shrink-0 mt-0.5 sm:mt-0"
                     title="Đánh dấu hoàn thành"
                   >
                     {task.status === 'done' ? (
@@ -359,14 +360,14 @@ export default function TasksPage() {
                       <div className="h-5 w-5 rounded-full border-2 border-slate-300 hover:border-emerald-500 transition-colors" />
                     )}
                   </button>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p 
                       onClick={() => openViewModal(task)}
-                      className={`text-sm font-medium cursor-pointer group-hover:text-indigo-600 transition-colors ${task.status === 'done' ? 'text-slate-500 line-through' : 'text-slate-900'}`}
+                      className={`text-sm font-medium cursor-pointer group-hover:text-indigo-600 transition-colors truncate ${task.status === 'done' ? 'text-slate-500 line-through' : 'text-slate-900'}`}
                     >
                       {task.title}
                     </p>
-                    <div className="flex items-center gap-3 mt-1">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                       <p className="text-xs text-slate-500">Hạn chót: {task.dueDate} {task.month ? `(${task.month})` : ''}</p>
                       <button 
                         onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
@@ -383,8 +384,8 @@ export default function TasksPage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                <div className="flex items-center gap-2 pl-8 sm:pl-0">
+                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] sm:text-xs font-medium ${
                     task.type === 'audit' ? 'bg-blue-100 text-blue-800' :
                     task.type === 'content' ? 'bg-purple-100 text-purple-800' :
                     task.type === 'backlink' ? 'bg-orange-100 text-orange-800' :
@@ -402,7 +403,7 @@ export default function TasksPage() {
                       updateTask(task.id, { status: e.target.value as TaskStatus });
                     }}
                     onClick={(e) => e.stopPropagation()}
-                    className={`text-xs font-medium rounded-full px-2.5 py-0.5 border-0 cursor-pointer focus:ring-0 ${
+                    className={`text-[10px] sm:text-xs font-medium rounded-full px-2 py-0.5 border-0 cursor-pointer focus:ring-0 ${
                       task.status === 'done' ? 'bg-emerald-100 text-emerald-800' :
                       task.status === 'in-progress' ? 'bg-amber-100 text-amber-800' :
                       'bg-slate-100 text-slate-800'
