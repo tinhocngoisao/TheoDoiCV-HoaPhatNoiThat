@@ -14,7 +14,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
       <body className="flex h-full flex-col overflow-hidden" suppressHydrationWarning>
         <DataProvider>
           <Navbar />
-          <main className="flex-1 overflow-y-auto p-6 w-full">
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 w-full">
             {children}
           </main>
         </DataProvider>

@@ -16,7 +16,6 @@ export interface KeywordRanking {
   id: string;
   keyword: string;
   url: string;
-  volume: number;
   history: { date: string; rank: number }[];
   currentRank: number;
   previousRank: number;
@@ -39,14 +38,11 @@ export const mockTasks: Task[] = [
   { id: '6', title: 'Cập nhật nội dung bài cũ', type: 'content', status: 'todo', date: '2026-03-14', dueDate: '2026-03-16', month: 'Tháng 3/2026', description: 'Cập nhật thông tin cho bài viết năm ngoái.' },
 ];
 
-export const last30Days = [
-  '2026-02-11', '2026-02-12', '2026-02-13', '2026-02-14', '2026-02-15',
-  '2026-02-16', '2026-02-17', '2026-02-18', '2026-02-19', '2026-02-20',
-  '2026-02-21', '2026-02-22', '2026-02-23', '2026-02-24', '2026-02-25',
-  '2026-02-26', '2026-02-27', '2026-02-28', '2026-03-01', '2026-03-02',
-  '2026-03-03', '2026-03-04', '2026-03-05', '2026-03-06', '2026-03-07',
-  '2026-03-08', '2026-03-09', '2026-03-10', '2026-03-11', '2026-03-12'
-];
+export const last30Days = Array.from({ length: 30 }).map((_, i) => {
+  const d = new Date();
+  d.setDate(d.getDate() - (29 - i));
+  return d.toISOString().split('T')[0];
+});
 
 const generateHistory = (baseRank: number, seed: number) => {
   return last30Days.map((date, index) => {
@@ -56,11 +52,11 @@ const generateHistory = (baseRank: number, seed: number) => {
 };
 
 const kwData = [
-  { id: '1', keyword: 'dịch vụ seo', url: '/dich-vu-seo', volume: 5400, baseRank: 4, seed: 0.5 },
-  { id: '2', keyword: 'đào tạo seo', url: '/dao-tao-seo', volume: 3600, baseRank: 2, seed: 0.8 },
-  { id: '3', keyword: 'công ty seo', url: '/cong-ty-seo', volume: 2900, baseRank: 11, seed: 0.3 },
-  { id: '4', keyword: 'báo giá seo', url: '/bao-gia-seo', volume: 1200, baseRank: 9, seed: 0.6 },
-  { id: '5', keyword: 'seo tổng thể', url: '/seo-tong-the', volume: 4100, baseRank: 5, seed: 0.4 }
+  { id: '1', keyword: 'dịch vụ seo', url: '/dich-vu-seo', baseRank: 4, seed: 0.5 },
+  { id: '2', keyword: 'đào tạo seo', url: '/dao-tao-seo', baseRank: 2, seed: 0.8 },
+  { id: '3', keyword: 'công ty seo', url: '/cong-ty-seo', baseRank: 11, seed: 0.3 },
+  { id: '4', keyword: 'báo giá seo', url: '/bao-gia-seo', baseRank: 9, seed: 0.6 },
+  { id: '5', keyword: 'seo tổng thể', url: '/seo-tong-the', baseRank: 5, seed: 0.4 }
 ];
 
 export const mockKeywords: KeywordRanking[] = kwData.map(kw => {
@@ -69,7 +65,6 @@ export const mockKeywords: KeywordRanking[] = kwData.map(kw => {
     id: kw.id,
     keyword: kw.keyword,
     url: kw.url,
-    volume: kw.volume,
     history,
     currentRank: history[history.length - 1].rank,
     previousRank: history[history.length - 2].rank,

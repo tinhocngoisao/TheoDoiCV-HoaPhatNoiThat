@@ -1,0 +1,74 @@
+{
+  "entities": {
+    "Task": {
+      "title": "Task",
+      "description": "A SEO task",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "type": { "type": "string", "enum": ["audit", "content", "backlink", "social", "other"] },
+        "status": { "type": "string", "enum": ["todo", "in-progress", "done"] },
+        "date": { "type": "string", "format": "date" },
+        "dueDate": { "type": "string", "format": "date" },
+        "month": { "type": "string" },
+        "description": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "type", "status", "date", "dueDate", "userId", "createdAt"]
+    },
+    "KeywordRanking": {
+      "title": "KeywordRanking",
+      "description": "A tracked keyword and its ranking history",
+      "type": "object",
+      "properties": {
+        "keyword": { "type": "string" },
+        "url": { "type": "string" },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": { "type": "string", "format": "date" },
+              "rank": { "type": "number" }
+            },
+            "required": ["date", "rank"]
+          }
+        },
+        "currentRank": { "type": "number" },
+        "previousRank": { "type": "number" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["keyword", "url", "history", "currentRank", "previousRank", "userId", "createdAt"]
+    },
+    "MonthlyPlan": {
+      "title": "MonthlyPlan",
+      "description": "A monthly SEO plan",
+      "type": "object",
+      "properties": {
+        "month": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "progress": { "type": "number" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["month", "title", "description", "progress", "userId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/tasks/{taskId}": {
+      "schema": { "$ref": "#/entities/Task" },
+      "description": "Tasks for a specific user"
+    },
+    "/users/{userId}/keywords/{keywordId}": {
+      "schema": { "$ref": "#/entities/KeywordRanking" },
+      "description": "Tracked keywords for a specific user"
+    },
+    "/users/{userId}/plans/{planId}": {
+      "schema": { "$ref": "#/entities/MonthlyPlan" },
+      "description": "Monthly plans for a specific user"
+    }
+  }
+}

@@ -1,0 +1,170 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users/{ownerId}
+    // Document ID: ownerId
+    // Fields:
+    //   - email: string (optional)
+    //   - sharedWith: list of strings (emails) (required)
+    //
+    // Collection: users/{ownerId}/tasks
+    // Document ID: auto-generated
+    // Fields:
+    //   - title: string (required)
+    //   - type: string (required)
+    //   - status: string (required)
+    //   - date: string (required)
+    //   - dueDate: string (required)
+    //   - month: string (optional)
+    //   - description: string (optional)
+    //   - userId: string (required, immutable) - represents ownerId
+    //   - createdAt: string (required, immutable)
+    //
+    // Collection: users/{ownerId}/keywords
+    // Document ID: auto-generated
+    // Fields:
+    //   - keyword: string (required)
+    //   - url: string (required)
+    //   - history: list (required)
+    //   - currentRank: number (required)
+    //   - previousRank: number (required)
+    //   - userId: string (required, immutable) - represents ownerId
+    //   - createdAt: string (required, immutable)
+    //
+    // Collection: users/{ownerId}/plans
+    // Document ID: auto-generated
+    // Fields:
+    //   - month: string (required)
+    //   - title: string (required)
+    //   - description: string (required)
+    //   - progress: number (required)
+    //   - userId: string (required, immutable) - represents ownerId
+    //   - createdAt: string (required, immutable)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isOwnerOrShared(ownerId) {
+      return isAuthenticated() && (
+        request.auth.uid == ownerId || 
+        (
+          request.auth.token.email != null &&
+          exists(/databases/$(database)/documents/users/$(ownerId)) &&
+          request.auth.token.email in get(/databases/$(database)/documents/users/$(ownerId)).data.sharedWith
+        )
+      );
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function uidUnchanged(ownerId) {
+      return !('userId' in request.resource.data) || request.resource.data.userId == ownerId;
+    }
+
+    function uidNotModified() {
+      return !('userId' in request.resource.data) || request.resource.data.userId == resource.data.userId;
+    }
+    
+    function createdAtNotModified() {
+      return !('createdAt' in request.resource.data) || request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    function isValidUserDoc() {
+      let data = request.resource.data;
+      return hasRequiredFields(['sharedWith']) &&
+             data.sharedWith is list && data.sharedWith.size() <= 50 &&
+             (!('email' in data) || data.email is string);
+    }
+
+    function isValidTask(ownerId) {
+      let data = request.resource.data;
+      return hasRequiredFields(['title', 'type', 'status', 'date', 'dueDate', 'userId', 'createdAt']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.type in ['audit', 'content', 'backlink', 'social', 'other'] &&
+             data.status in ['todo', 'in-progress', 'done'] &&
+             data.date is string && data.date.size() < 50 &&
+             data.dueDate is string && data.dueDate.size() < 50 &&
+             (!('month' in data) || (data.month is string && data.month.size() < 50)) &&
+             (!('description' in data) || (data.description is string && data.description.size() < 2000)) &&
+             data.userId is string && data.userId == ownerId &&
+             data.createdAt is string;
+    }
+
+    function isValidKeywordRanking(ownerId) {
+      let data = request.resource.data;
+      return hasRequiredFields(['keyword', 'url', 'history', 'currentRank', 'previousRank', 'userId', 'createdAt']) &&
+             data.keyword is string && data.keyword.size() > 0 && data.keyword.size() < 200 &&
+             data.url is string && data.url.size() < 1000 &&
+             data.history is list && data.history.size() <= 10000 &&
+             data.currentRank is number && data.currentRank >= 0 &&
+             data.previousRank is number && data.previousRank >= 0 &&
+             data.userId is string && data.userId == ownerId &&
+             data.createdAt is string;
+    }
+
+    function isValidMonthlyPlan(ownerId) {
+      let data = request.resource.data;
+      return hasRequiredFields(['month', 'title', 'description', 'progress', 'userId', 'createdAt']) &&
+             data.month is string && data.month.size() > 0 && data.month.size() < 50 &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.description is string && data.description.size() < 2000 &&
+             data.progress is number && data.progress >= 0 && data.progress <= 100 &&
+             data.userId is string && data.userId == ownerId &&
+             data.createdAt is string;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+    match /users/{ownerId} {
+      allow read: if isAuthenticated() && (request.auth.uid == ownerId || request.auth.token.email in resource.data.sharedWith);
+      allow create: if isOwner(ownerId) && isValidUserDoc();
+      allow update: if isOwner(ownerId) && isValidUserDoc();
+      allow delete: if isOwner(ownerId);
+    }
+
+    match /users/{ownerId}/tasks/{taskId} {
+      allow read: if isOwnerOrShared(ownerId);
+      allow create: if isOwnerOrShared(ownerId) && isValidTask(ownerId) && uidUnchanged(ownerId);
+      allow update: if isOwnerOrShared(ownerId) && isValidTask(ownerId) && uidNotModified() && createdAtNotModified();
+      allow delete: if isOwnerOrShared(ownerId);
+    }
+
+    match /users/{ownerId}/keywords/{keywordId} {
+      allow read: if isOwnerOrShared(ownerId);
+      allow create: if isOwnerOrShared(ownerId) && isValidKeywordRanking(ownerId) && uidUnchanged(ownerId);
+      allow update: if isOwnerOrShared(ownerId) && isValidKeywordRanking(ownerId) && uidNotModified() && createdAtNotModified();
+      allow delete: if isOwnerOrShared(ownerId);
+    }
+
+    match /users/{ownerId}/plans/{planId} {
+      allow read: if isOwnerOrShared(ownerId);
+      allow create: if isOwnerOrShared(ownerId) && isValidMonthlyPlan(ownerId) && uidUnchanged(ownerId);
+      allow update: if isOwnerOrShared(ownerId) && isValidMonthlyPlan(ownerId) && uidNotModified() && createdAtNotModified();
+      allow delete: if isOwnerOrShared(ownerId);
+    }
+  }
+}

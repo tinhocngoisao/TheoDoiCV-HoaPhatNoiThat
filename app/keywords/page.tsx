@@ -7,20 +7,52 @@ import { ArrowUpRight, ArrowDownRight, Search, Plus, X, Edit, Trash2, RefreshCw 
 
 export default function KeywordsPage() {
   const { keywords, addKeyword, updateKeyword, deleteKeyword, checkKeywordRank } = useData();
-  const [viewRange, setViewRange] = useState<'week' | 'month'>('week');
-  const displayDates = viewRange === 'week' ? last30Days.slice(-7) : last30Days;
+  const [viewRange, setViewRange] = useState<'week' | 'month' | '3months' | '6months' | '9months' | '12months'>('week');
+  
+  const getDisplayDates = () => {
+    const dates = [];
+    const today = new Date();
+    
+    if (viewRange === 'week') {
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        dates.push(d.toISOString().split('T')[0]);
+      }
+    } else if (viewRange === 'month') {
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        dates.push(d.toISOString().split('T')[0]);
+      }
+    } else {
+      let columns = 12;
+      let daysInterval = 7;
+      if (viewRange === '3months') { columns = 12; daysInterval = 7; }
+      if (viewRange === '6months') { columns = 12; daysInterval = 15; }
+      if (viewRange === '9months') { columns = 12; daysInterval = 22; }
+      if (viewRange === '12months') { columns = 12; daysInterval = 30; }
+      
+      for (let i = columns - 1; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - (i * daysInterval));
+        dates.push(d.toISOString().split('T')[0]);
+      }
+    }
+    return dates;
+  };
+
+  const displayDates = getDisplayDates();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [selectedKeyword, setSelectedKeyword] = useState<KeywordRanking | null>(null);
   const [checkingIds, setCheckingIds] = useState<string[]>([]);
   
   const [newKeyword, setNewKeyword] = useState('');
-  const [newVolume, setNewVolume] = useState('');
 
   const openAddModal = () => {
     setModalMode('add');
     setNewKeyword('');
-    setNewVolume('');
     setSelectedKeyword(null);
     setIsModalOpen(true);
   };
@@ -28,7 +60,6 @@ export default function KeywordsPage() {
   const openEditModal = (kw: KeywordRanking) => {
     setModalMode('edit');
     setNewKeyword(kw.keyword);
-    setNewVolume(kw.volume.toString());
     setSelectedKeyword(kw);
     setIsModalOpen(true);
   };
@@ -45,12 +76,10 @@ export default function KeywordsPage() {
       addKeyword({
         keyword: newKeyword,
         url: '',
-        volume: parseInt(newVolume) || 0,
       });
     } else if (modalMode === 'edit' && selectedKeyword) {
       updateKeyword(selectedKeyword.id, {
         keyword: newKeyword,
-        volume: parseInt(newVolume) || 0,
       });
     }
     setIsModalOpen(false);
@@ -124,17 +153,6 @@ export default function KeywordsPage() {
                   placeholder="Nhập từ khoá..."
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Volume (Lượt tìm kiếm)</label>
-                <input 
-                  required
-                  type="number" 
-                  value={newVolume}
-                  onChange={e => setNewVolume(e.target.value)}
-                  className="w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                  placeholder="Ví dụ: 1000"
-                />
-              </div>
               <div className="mt-6 flex justify-end gap-3">
                 <button 
                   type="button" 
@@ -167,19 +185,19 @@ export default function KeywordsPage() {
               placeholder="Tìm kiếm từ khoá..."
             />
           </div>
-          <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-lg">
-            <button
-              onClick={() => setViewRange('week')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewRange === 'week' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+          <div className="flex items-center gap-2">
+            <select
+              value={viewRange}
+              onChange={(e) => setViewRange(e.target.value as any)}
+              className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
             >
-              7 ngày qua
-            </button>
-            <button
-              onClick={() => setViewRange('month')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewRange === 'month' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
-            >
-              30 ngày qua
-            </button>
+              <option value="week">7 ngày qua</option>
+              <option value="month">30 ngày qua</option>
+              <option value="3months">3 tháng qua</option>
+              <option value="6months">6 tháng qua</option>
+              <option value="9months">9 tháng qua</option>
+              <option value="12months">12 tháng qua</option>
+            </select>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -187,7 +205,6 @@ export default function KeywordsPage() {
             <thead className="bg-slate-50">
               <tr>
                 <th scope="col" className="sticky left-0 z-10 bg-slate-50 py-3.5 pl-6 pr-3 text-left text-sm font-semibold text-slate-900 border-r border-slate-200 shadow-[1px_0_0_0_#e2e8f0]">Từ khoá</th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-slate-900 whitespace-nowrap">Volume</th>
                 <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-slate-900 whitespace-nowrap">Hạng HT</th>
                 {displayDates.map(d => (
                   <th key={d} scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-slate-900 whitespace-nowrap">
@@ -228,28 +245,57 @@ export default function KeywordsPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{kw.volume.toLocaleString()}</td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-indigo-600">
                       {kw.currentRank === 0 ? '>100' : kw.currentRank}
                     </td>
                     {displayDates.map((d, index) => {
-                      const rankObj = kw.history.find(h => h.date === d);
+                      // Find closest rank within 3 days for weekly/monthly, or 7 days for longer ranges
+                      const windowDays = viewRange === 'week' || viewRange === 'month' ? 3 : 7;
+                      const targetTime = new Date(d).getTime();
+                      
+                      let bestMatch = null;
+                      let minDiff = Infinity;
+                      
+                      for (const h of kw.history) {
+                        const hTime = new Date(h.date).getTime();
+                        const diffDays = Math.abs(hTime - targetTime) / (1000 * 60 * 60 * 24);
+                        if (diffDays <= windowDays && diffDays < minDiff) {
+                          minDiff = diffDays;
+                          bestMatch = h;
+                        }
+                      }
+                      
+                      const rankObj = bestMatch;
                       const rank = rankObj ? (rankObj.rank === 0 ? '>100' : rankObj.rank) : '-';
                       
                       let changeIcon = null;
                       if (index > 0 && rankObj && rankObj.rank !== 0) {
-                        const prevRankObj = kw.history.find(h => h.date === displayDates[index - 1]);
-                        if (prevRankObj && typeof prevRankObj.rank === 'number' && prevRankObj.rank !== 0) {
-                          const diff = prevRankObj.rank - rankObj.rank;
-                          if (diff > 0) changeIcon = <ArrowUpRight className="h-3 w-3 text-emerald-500 inline" />;
-                          else if (diff < 0) changeIcon = <ArrowDownRight className="h-3 w-3 text-red-500 inline" />;
+                        // Find previous column's rank
+                        const prevDate = displayDates[index - 1];
+                        const prevTargetTime = new Date(prevDate).getTime();
+                        let prevBestMatch = null;
+                        let prevMinDiff = Infinity;
+                        
+                        for (const h of kw.history) {
+                          const hTime = new Date(h.date).getTime();
+                          const diffDays = Math.abs(hTime - prevTargetTime) / (1000 * 60 * 60 * 24);
+                          if (diffDays <= windowDays && diffDays < prevMinDiff) {
+                            prevMinDiff = diffDays;
+                            prevBestMatch = h;
+                          }
+                        }
+                        
+                        if (prevBestMatch && typeof prevBestMatch.rank === 'number' && prevBestMatch.rank !== 0) {
+                          const diff = prevBestMatch.rank - rankObj.rank;
+                          if (diff > 0) changeIcon = <span title={`Tăng ${diff} bậc`}><ArrowUpRight className="h-3 w-3 text-emerald-500 inline" /></span>;
+                          else if (diff < 0) changeIcon = <span title={`Giảm ${Math.abs(diff)} bậc`}><ArrowDownRight className="h-3 w-3 text-red-500 inline" /></span>;
                         }
                       }
 
                       return (
                         <td key={d} className="whitespace-nowrap px-3 py-4 text-center text-sm text-slate-600">
                           <div className="flex items-center justify-center gap-1">
-                            <span>{rank}</span>
+                            <span title={rankObj ? `Đo ngày ${rankObj.date}` : 'Không có dữ liệu'}>{rank}</span>
                             {changeIcon}
                           </div>
                         </td>
