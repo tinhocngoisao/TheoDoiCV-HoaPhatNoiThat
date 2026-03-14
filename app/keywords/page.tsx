@@ -79,10 +79,10 @@ export default function KeywordsPage() {
                       const rank = rankObj?.rank || '-';
                       
                       let changeIcon = null;
-                      if (index > 0 && rank !== '-') {
+                      if (index > 0 && typeof rank === 'number') {
                         const prevRankObj = kw.history.find(h => h.date === displayDates[index - 1]);
-                        if (prevRankObj && prevRankObj.rank !== '-') {
-                          const diff = prevRankObj.rank - (rank as number);
+                        if (prevRankObj && typeof prevRankObj.rank === 'number') {
+                          const diff = prevRankObj.rank - rank;
                           if (diff > 0) changeIcon = <ArrowUpRight className="h-3 w-3 text-emerald-500 inline" />;
                           else if (diff < 0) changeIcon = <ArrowDownRight className="h-3 w-3 text-red-500 inline" />;
                         }
